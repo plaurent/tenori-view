@@ -11,6 +11,9 @@ import java.awt.geom._
 import javax.swing._
 import javax.swing.text._
 import java.awt.Color
+import java.awt.Font
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 
 
 import javax.imageio.ImageIO
@@ -25,8 +28,28 @@ import javax.sound.midi.Receiver
 import javax.sound.midi.SysexMessage
 import javax.sound.midi.MidiMessage
 
+
+
+//Private class SizeChangeListener extends ChangeListener[Number] {
+//    override def changed(obVal: ObservableValue[_ <: Number], oldVal: Number, newVal: Number): Unit = {
+//        // Get change in scene size
+//        val newSize = newVal.doubleValue()
+//        val oldSize = oldVal.doubleValue()
+//        val sizeChange = newSize - oldSize
+//        val percentChange = (sizeChange * 100) / oldSize
+//        // Apply the change to the label's font size
+//        val f = label.getFont
+//        var fontSize = f.getSize
+//        var fontChange = fontSize + (fontSize*percentChange)
+//        fontChange = if (fontChange > MAX_FONT_SIZE) MAX_FONT_SIZE else fontChange
+//        fontChange = if (fontChange < MIN_FONT_SIZE) MIN_FONT_SIZE else fontChange
+//        label.setFont(new Font(f.getName, fontChange))
+//    }
+//}
+
 object TenoriOnLCD extends JFrame {
     val sc = new StyleContext();
+    var currentSize:Dimension = new Dimension(0,0)
 
     def createDocument(text:String, invertStart:Int, invertLength:Int)={
       val result = new DefaultStyledDocument(sc)
@@ -43,7 +66,7 @@ object TenoriOnLCD extends JFrame {
     val invertedStyle = sc.addStyle("BLUE", null);
     invertedStyle.addAttribute(StyleConstants.Foreground, Color.white);
     invertedStyle.addAttribute(StyleConstants.Background, Color.black);
-    invertedStyle.addAttribute(StyleConstants.FontSize, new Integer(14));
+    //invertedStyle.addAttribute(StyleConstants.FontSize, new Integer(14));
     invertedStyle.addAttribute(StyleConstants.Bold, true);
 
     val doc0 = createDocument("Row 0", 0, 0)
@@ -58,10 +81,51 @@ object TenoriOnLCD extends JFrame {
   val row3 = new JTextPane(doc3)
   val rowX = new JPanel()
 
+    val MAX_FONT_SIZE = 70.0;
+    val MIN_FONT_SIZE = 10.0;
+    var fontSizeReal:Double = row0.getFont().getSize;
+    var fontNameReal= row0.getFont().getName;
+
+
+    addComponentListener(new ComponentAdapter() {
+            override def componentResized(e:ComponentEvent) {
+                val newSize:Double = getSize().width
+                val oldSize:Double = currentSize.width
+                val sizeChange:Double = newSize - oldSize
+                val percentChange:Double = (sizeChange) / oldSize
+                var fontSize = fontSizeReal
+                var fontChange = fontSize + (fontSize*percentChange)
+                fontChange = if (fontChange > MAX_FONT_SIZE) MAX_FONT_SIZE else fontChange
+                fontChange = if (fontChange < MIN_FONT_SIZE) MIN_FONT_SIZE else fontChange
+                row0.setFont(new Font(fontNameReal, Font.PLAIN, fontChange.intValue()))
+                row1.setFont(new Font(fontNameReal, Font.PLAIN, fontChange.intValue()))
+                row2.setFont(new Font(fontNameReal, Font.PLAIN, fontChange.intValue()))
+                row3.setFont(new Font(fontNameReal, Font.PLAIN, fontChange.intValue()))
+                fontSizeReal = fontChange
+
+                currentSize = getSize()
+            }
+        });
+
+  def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
+
+    row match {
+      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) ; }
+      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) ; }
+      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) ; }
+      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) ; }
+      case _ => println("Unknown lcd row")
+    }
+
+  }
+
+
   def launch = {
     val thisFrame = TenoriOnLCD 
     thisFrame.setLayout(new java.awt.GridLayout(4,1));
-    thisFrame.setSize(new Dimension(500, 400))
+    val size = new Dimension(200, 250)
+    thisFrame.setSize(size)
+    thisFrame.currentSize = size
     thisFrame.add(row0)
     thisFrame.add(row1)
     thisFrame.add(row2)
@@ -97,14 +161,16 @@ object SysExListener {
                 val str = new String(data) // , StandardCharsets.UTF_8)
                 val invStart = data(INV_START_CHAR)
                 val invLength = data(INV_NUM_CHARS)
-                data(LCD_ROW_NUMBER) match {
-                  //case 0 => TenoriOnLCD.row0.setText(str)
-                  case 0 => TenoriOnLCD.row0.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                  case 1 => TenoriOnLCD.row1.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                  case 2 => TenoriOnLCD.row2.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                  case 3 => TenoriOnLCD.row3.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                  case _ => System.out.println("Row > 3 " + str)
-                }
+
+                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
+                //data(LCD_ROW_NUMBER) match {
+                //  //case 0 => TenoriOnLCD.row0.setText(str)
+                //  case 0 => TenoriOnLCD.row0.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
+                //  case 1 => TenoriOnLCD.row1.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
+                //  case 2 => TenoriOnLCD.row2.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
+                //  case 3 => TenoriOnLCD.row3.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
+                //  case _ => System.out.println("Row > 3 " + str)
+                //}
               }
               
               for (byte <- data) {
