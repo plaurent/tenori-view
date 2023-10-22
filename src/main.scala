@@ -134,14 +134,6 @@ object SysExListener {
                 val invLength = data(INV_NUM_CHARS)
 
                 TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
-                //data(LCD_ROW_NUMBER) match {
-                //  //case 0 => TenoriOnLCD.row0.setText(str)
-                //  case 0 => TenoriOnLCD.row0.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                //  case 1 => TenoriOnLCD.row1.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                //  case 2 => TenoriOnLCD.row2.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                //  case 3 => TenoriOnLCD.row3.setDocument(TenoriOnLCD.createDocument(str substring(START_OF_STR, START_OF_STR+20), invStart, invLength))
-                //  case _ => System.out.println("Row > 3 " + str)
-                //}
               }
               
               for (byte <- data) {
