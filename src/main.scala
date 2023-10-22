@@ -1,12 +1,4 @@
-import java.awt.AlphaComposite
-import java.awt.Graphics
-import java.awt.EventQueue
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
 import java.awt.Dimension
-import java.awt.Graphics2D
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
 import java.awt.geom._
 import javax.swing._
 import javax.swing.text._
@@ -14,9 +6,6 @@ import java.awt.Color
 import java.awt.Font
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-
-
-import javax.imageio.ImageIO
 
 import uk.co.xfactorylibrarians.coremidi4j.CoreMidiDeviceProvider
 import uk.co.xfactorylibrarians.coremidi4j.CoreMidiNotification
@@ -28,24 +17,6 @@ import javax.sound.midi.Receiver
 import javax.sound.midi.SysexMessage
 import javax.sound.midi.MidiMessage
 
-
-
-//Private class SizeChangeListener extends ChangeListener[Number] {
-//    override def changed(obVal: ObservableValue[_ <: Number], oldVal: Number, newVal: Number): Unit = {
-//        // Get change in scene size
-//        val newSize = newVal.doubleValue()
-//        val oldSize = oldVal.doubleValue()
-//        val sizeChange = newSize - oldSize
-//        val percentChange = (sizeChange * 100) / oldSize
-//        // Apply the change to the label's font size
-//        val f = label.getFont
-//        var fontSize = f.getSize
-//        var fontChange = fontSize + (fontSize*percentChange)
-//        fontChange = if (fontChange > MAX_FONT_SIZE) MAX_FONT_SIZE else fontChange
-//        fontChange = if (fontChange < MIN_FONT_SIZE) MIN_FONT_SIZE else fontChange
-//        label.setFont(new Font(f.getName, fontChange))
-//    }
-//}
 
 object TenoriOnLCD extends JFrame {
     val sc = new StyleContext();
