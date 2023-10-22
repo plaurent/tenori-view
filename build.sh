@@ -1,1 +1,13 @@
-scalac -cp coremidi4j-1.6.jar:. main.scala
+#!/bin/sh
+
+mkdir -p bin
+
+cd src
+
+export CLASSPATH=$CLASSPATH:"../libs/*"
+
+echo "Compiling"
+scalac *scala -d ../bin/
+
+cd ..
+echo "Classes are in ./bin/"

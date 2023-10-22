@@ -10,6 +10,7 @@ cp ../libs/*jar lib/.
 rm -f *.jar
 
 echo "Compiling"
+export CLASSPATH=$CLASSPATH:"../libs/*"
 scalac *scala -d ./bin/
 
 echo "Unpacking all required libraries for standalone distribution"
