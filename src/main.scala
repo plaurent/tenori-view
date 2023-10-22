@@ -37,7 +37,6 @@ object TenoriOnLCD extends JFrame {
     val invertedStyle = sc.addStyle("BLUE", null);
     invertedStyle.addAttribute(StyleConstants.Foreground, Color.white);
     invertedStyle.addAttribute(StyleConstants.Background, Color.black);
-    //invertedStyle.addAttribute(StyleConstants.FontSize, new Integer(14));
     invertedStyle.addAttribute(StyleConstants.Bold, true);
 
     val doc0 = createDocument("Row 0", 0, 0)
