@@ -18,6 +18,52 @@ import javax.sound.midi.SysexMessage
 import javax.sound.midi.MidiMessage
 
 
+object SysExListener {
+  // Tenori-On LCD Display MIDI Protocol from pika.blue
+  val LCD_ROW_NUMBER = 5
+  val INV_NUM_CHARS = 6
+  val INV_START_CHAR = 7
+  val START_OF_STR = 8
+  val PREAMBLE = Array[Byte](67, 115, 1, 51, 2)
+  val DEBUG = false
+
+  def launch= {
+    //val infos = MidiSystem.getMidiDeviceInfo()  // Standard MIDI SysEx doesn't work on OS X so we use a library.
+    val infos = CoreMidiDeviceProvider.getMidiDeviceInfo()
+    for (info <- infos) {
+      val device = MidiSystem getMidiDevice info;
+      if (device.getMaxTransmitters != 0) {
+        device.open
+        device.getTransmitter setReceiver new Receiver() {
+          def send(message: MidiMessage, timeStamp: Long) = {
+            if (message.isInstanceOf[SysexMessage]) {
+              val sysExMessage = message.asInstanceOf[SysexMessage];
+              val data = sysExMessage.getData();
+
+              if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE)) 
+              {
+                val str = new String(data) // , StandardCharsets.UTF_8)
+                val invStart = data(INV_START_CHAR)
+                val invLength = data(INV_NUM_CHARS)
+
+                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
+              }
+              
+              if (DEBUG) {
+                for (byte <- data) {
+                  print(byte + " ")
+                }
+                println()
+              }
+            }
+          }
+          def close() = {}
+        }
+      }
+    }
+  }
+}
+
 object TenoriOnLCD extends JFrame {
     val sc = new StyleContext();
     var currentSize:Dimension = new Dimension(0,0)
@@ -102,51 +148,6 @@ object TenoriOnLCD extends JFrame {
   }
 }
 
-object SysExListener {
-  // Tenori-On LCD Display MIDI Protocol from pika.blue
-  val LCD_ROW_NUMBER = 5
-  val INV_NUM_CHARS = 6
-  val INV_START_CHAR = 7
-  val START_OF_STR = 8
-  val PREAMBLE = Array[Byte](67, 115, 1, 51, 2)
-  val DEBUG = false
-
-  def launch= {
-    //val infos = MidiSystem.getMidiDeviceInfo()  // Standard MIDI SysEx doesn't work on OS X so we use a library.
-    val infos = CoreMidiDeviceProvider.getMidiDeviceInfo()
-    for (info <- infos) {
-      val device = MidiSystem getMidiDevice info;
-      if (device.getMaxTransmitters != 0) {
-        device.open
-        device.getTransmitter setReceiver new Receiver() {
-          def send(message: MidiMessage, timeStamp: Long) = {
-            if (message.isInstanceOf[SysexMessage]) {
-              val sysExMessage = message.asInstanceOf[SysexMessage];
-              val data = sysExMessage.getData();
-
-              if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE)) 
-              {
-                val str = new String(data) // , StandardCharsets.UTF_8)
-                val invStart = data(INV_START_CHAR)
-                val invLength = data(INV_NUM_CHARS)
-
-                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
-              }
-              
-              if (DEBUG) {
-                for (byte <- data) {
-                  print(byte + " ")
-                }
-                println()
-              }
-            }
-          }
-          def close() = {}
-        }
-      }
-    }
-  }
-}
 
 trait hasPrintln {
       def println(s:String)
