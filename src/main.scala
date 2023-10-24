@@ -80,11 +80,11 @@ object TenoriOnLCD extends JFrame {
   def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
 
     row match {
-      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) ; }
-      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) ; }
-      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) ; }
-      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) ; }
-      case _ => println("Unknown lcd row")
+      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) }
+      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) }
+      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) }
+      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) }
+      case _ => { Console.println(text) }
     }
 
   }
@@ -149,8 +149,40 @@ object SysExListener {
   }
 }
 
+trait hasPrintln {
+      def println(s:String)
+}
+
+object Console extends JFrame with hasPrintln {
+  var textArea:JTextArea = null
+  def println(s:String){
+    textArea.setText(textArea.getText() + s + "\n")
+  }
+  def launch= {
+    val thisFrame = Console
+
+    textArea = new JTextArea("Console\n");
+    textArea.setSize(300,300);
+
+    textArea.setLineWrap(true);
+    textArea.setEditable(true);
+    textArea.setVisible(true);
+
+    val caret = textArea.getCaret().asInstanceOf[DefaultCaret]
+    caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+
+    val scroll = new JScrollPane (textArea);
+    thisFrame.add(scroll);
+    thisFrame.setSize(new Dimension(400, 400))
+    thisFrame.setVisible(true);
+    thisFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+  }
+}
+
 
 object main extends App {
+  Console.launch
   TenoriOnLCD.launch
   SysExListener.launch
 }
