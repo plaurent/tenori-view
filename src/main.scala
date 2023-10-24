@@ -43,10 +43,11 @@ object SysExListener {
               if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE)) 
               {
                 val str = new String(data) // , StandardCharsets.UTF_8)
+                val dbg = (data.slice(START_OF_STR, START_OF_STR+20) map (byte => if (byte>10) "" + byte.toHexString.toUpperCase else "0" + byte.toHexString.toUpperCase )) mkString ""
                 val invStart = data(INV_START_CHAR)
                 val invLength = data(INV_NUM_CHARS)
 
-                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
+                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength, dbg)
               }
               
               if (DEBUG) {
@@ -121,13 +122,13 @@ object TenoriOnLCD extends JFrame {
             }
         });
 
-  def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
+  def displayText(row:Int, text:String, invStart:Int, invLength:Int, dbg:String)={
     row match {
       case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) }
       case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) }
       case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) }
       case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) }
-      case _ => { Console.println(text) }
+      case _ => { Console.println(dbg.grouped(4).toList.mkString(" ")) }
     }
   }
 
@@ -161,7 +162,7 @@ object Console extends JFrame with hasPrintln {
   def launch= {
     val thisFrame = Console
 
-    textArea = new JTextArea("Messages for LCD row > 3 will go here.");
+    textArea = new JTextArea("Messages for LCD row > 3 will go here.\n");
     textArea.setSize(300,300);
 
     textArea.setLineWrap(true);
