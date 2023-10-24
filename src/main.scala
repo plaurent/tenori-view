@@ -34,7 +34,7 @@ object TenoriOnLCD extends JFrame {
       result
     }
 
-    val invertedStyle = sc.addStyle("BLUE", null);
+    val invertedStyle = sc.addStyle("MYINVERTEDSTYLE", null);
     invertedStyle.addAttribute(StyleConstants.Foreground, Color.white);
     invertedStyle.addAttribute(StyleConstants.Background, Color.black);
     invertedStyle.addAttribute(StyleConstants.Bold, true);
@@ -44,18 +44,16 @@ object TenoriOnLCD extends JFrame {
     val doc2 = createDocument("Row 2", 0, 0)
     val doc3 = createDocument("Row 3", 0, 0)
 
-
-  val row0 = new JTextPane(doc0)
-  val row1 = new JTextPane(doc1)
-  val row2 = new JTextPane(doc2)
-  val row3 = new JTextPane(doc3)
-  val rowX = new JPanel()
+    val row0 = new JTextPane(doc0)
+    val row1 = new JTextPane(doc1)
+    val row2 = new JTextPane(doc2)
+    val row3 = new JTextPane(doc3)
+    val rowX = new JPanel()
 
     val MAX_FONT_SIZE = 70.0;
     val MIN_FONT_SIZE = 10.0;
     var fontSizeReal:Double = row0.getFont().getSize;
     var fontNameReal= row0.getFont().getName;
-
 
     addComponentListener(new ComponentAdapter() {
             override def componentResized(e:ComponentEvent) {
@@ -78,7 +76,6 @@ object TenoriOnLCD extends JFrame {
         });
 
   def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
-
     row match {
       case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) }
       case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) }
@@ -86,7 +83,6 @@ object TenoriOnLCD extends JFrame {
       case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) }
       case _ => { Console.println(text) }
     }
-
   }
 
 
@@ -107,13 +103,16 @@ object TenoriOnLCD extends JFrame {
 }
 
 object SysExListener {
+  // Tenori-On LCD Display MIDI Protocol from pika.blue
   val LCD_ROW_NUMBER = 5
   val INV_NUM_CHARS = 6
   val INV_START_CHAR = 7
   val START_OF_STR = 8
+  val PREAMBLE = Array[Byte](67, 115, 1, 51, 2)
+  val DEBUG = false
 
   def launch= {
-    //val infos = MidiSystem.getMidiDeviceInfo()
+    //val infos = MidiSystem.getMidiDeviceInfo()  // Standard MIDI SysEx doesn't work on OS X so we use a library.
     val infos = CoreMidiDeviceProvider.getMidiDeviceInfo()
     for (info <- infos) {
       val device = MidiSystem getMidiDevice info;
@@ -125,7 +124,6 @@ object SysExListener {
               val sysExMessage = message.asInstanceOf[SysexMessage];
               val data = sysExMessage.getData();
 
-              val PREAMBLE = Array[Byte](67, 115, 1, 51, 2)
               if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE)) 
               {
                 val str = new String(data) // , StandardCharsets.UTF_8)
@@ -135,11 +133,12 @@ object SysExListener {
                 TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
               }
               
-              for (byte <- data) {
-                print(byte + " ")
+              if (DEBUG) {
+                for (byte <- data) {
+                  print(byte + " ")
+                }
+                println()
               }
-              //print(str)
-              println()
             }
           }
           def close() = {}
@@ -161,7 +160,7 @@ object Console extends JFrame with hasPrintln {
   def launch= {
     val thisFrame = Console
 
-    textArea = new JTextArea("Console\n");
+    textArea = new JTextArea("Messages for LCD row > 3 will go here.");
     textArea.setSize(300,300);
 
     textArea.setLineWrap(true);
