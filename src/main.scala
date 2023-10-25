@@ -78,12 +78,12 @@ object SysExListener {
               {
                 val str = new String(data) // , StandardCharsets.UTF_8)
 
-                if (data(LCD_ROW_NUMBER) == 0  ) {  // > 3) {
+                if (data(LCD_ROW_NUMBER) > 3  ) {  
                   val baseBytes = data slice (START_OF_STR, START_OF_STR+20)
                   val byteMask = getMask(data.slice(START_OF_STR+20, START_OF_STR+20+3))
                   val reconstructed = baseBytes zip byteMask map (pair => pair._1 + (if (pair._2) 0x80 else 0))
                   val dbg = reconstructed map (byte => (if (byte>10) "" else "0") + byte.toHexString.toUpperCase) mkString ""
-                  Console.println(dbg.grouped(4).toList.mkString(" "))
+                  Console.println(data(LCD_ROW_NUMBER) + ": " + dbg.grouped(4).toList.mkString(" "))
                 }
 
                 val invStart = data(INV_START_CHAR)
@@ -170,7 +170,7 @@ object TenoriOnLCD extends JFrame {
       case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) }
       case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) }
       case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) }
-      case _ => { Console.println("Unhandled row number.") } 
+      case _ => {  } 
     }
   }
 
