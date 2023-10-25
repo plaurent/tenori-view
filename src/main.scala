@@ -27,6 +27,40 @@ object SysExListener {
   val PREAMBLE = Array[Byte](67, 115, 1, 51, 2)
   val DEBUG = false
 
+  def bit(value:Int, which:Int):Boolean={
+    return ((value >> which) & 1) == 1
+  }
+  def getMask(extension_bytes:Array[Byte]):List[Boolean]= {
+    //<ex0-6> = 7 bits, one for each of the first 7 characters, indicating whether the character should be OR'd with 0x80. 
+    //<ex7-13> = ditto, for the next 7 characters
+    //<ex14-19> = ditto, for the next 7 characters.
+
+    List(
+      bit(extension_bytes(0), 0),  // whether to add 0x80 to character 0
+      bit(extension_bytes(0), 1),  // whether to add 0x80 to character 1
+      bit(extension_bytes(0), 2),  // whether to add 0x80 to character 2
+      bit(extension_bytes(0), 3),  // whether to add 0x80 to character 3
+      bit(extension_bytes(0), 4),  // whether to add 0x80 to character 4
+      bit(extension_bytes(0), 5),  // whether to add 0x80 to character 5
+      bit(extension_bytes(0), 6),  // whether to add 0x80 to character 6
+
+      bit(extension_bytes(1), 0),  // whether to add 0x80 to character 7
+      bit(extension_bytes(1), 1),  // whether to add 0x80 to character 8
+      bit(extension_bytes(1), 2),  // whether to add 0x80 to character 9
+      bit(extension_bytes(1), 3),  // whether to add 0x80 to character 10
+      bit(extension_bytes(1), 4),  // whether to add 0x80 to character 11
+      bit(extension_bytes(1), 5),  // whether to add 0x80 to character 12
+      bit(extension_bytes(1), 6),  // whether to add 0x80 to character 13
+
+      bit(extension_bytes(2), 0),  // whether to add 0x80 to character 14
+      bit(extension_bytes(2), 1),  // whether to add 0x80 to character 15
+      bit(extension_bytes(2), 2),  // whether to add 0x80 to character 16
+      bit(extension_bytes(2), 3),  // whether to add 0x80 to character 17
+      bit(extension_bytes(2), 4),  // whether to add 0x80 to character 18
+      bit(extension_bytes(2), 5),  // whether to add 0x80 to character 19
+    )
+  }
+
   def launch= {
     //val infos = MidiSystem.getMidiDeviceInfo()  // Standard MIDI SysEx doesn't work on OS X so we use a library.
     val infos = CoreMidiDeviceProvider.getMidiDeviceInfo()
@@ -43,11 +77,19 @@ object SysExListener {
               if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE)) 
               {
                 val str = new String(data) // , StandardCharsets.UTF_8)
-                val dbg = (data.slice(START_OF_STR, START_OF_STR+20) map (byte => if (byte>10) "" + byte.toHexString.toUpperCase else "0" + byte.toHexString.toUpperCase )) mkString ""
+
+                if (data(LCD_ROW_NUMBER) == 0  ) {  // > 3) {
+                  val baseBytes = data slice (START_OF_STR, START_OF_STR+20)
+                  val byteMask = getMask(data.slice(START_OF_STR+20, START_OF_STR+20+3))
+                  val reconstructed = baseBytes zip byteMask map (pair => pair._1 + (if (pair._2) 0x80 else 0))
+                  val dbg = reconstructed map (byte => (if (byte>10) "" else "0") + byte.toHexString.toUpperCase) mkString ""
+                  Console.println(dbg.grouped(4).toList.mkString(" "))
+                }
+
                 val invStart = data(INV_START_CHAR)
                 val invLength = data(INV_NUM_CHARS)
 
-                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength, dbg)
+                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
               }
               
               if (DEBUG) {
@@ -122,13 +164,13 @@ object TenoriOnLCD extends JFrame {
             }
         });
 
-  def displayText(row:Int, text:String, invStart:Int, invLength:Int, dbg:String)={
+  def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
     row match {
       case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) }
       case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) }
       case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) }
       case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) }
-      case _ => { Console.println(dbg.grouped(4).toList.mkString(" ")) }
+      case _ => { Console.println("Unhandled row number.") } 
     }
   }
 
