@@ -17,6 +17,9 @@ import javax.sound.midi.Receiver
 import javax.sound.midi.SysexMessage
 import javax.sound.midi.MidiMessage
 
+import scala.collection.mutable.ArrayBuffer
+
+
 
 object SysExListener {
   // Tenori-On LCD Display MIDI Protocol from pika.blue
@@ -163,13 +166,29 @@ object TenoriOnLCD extends JFrame {
                 currentSize = getSize()
             }
         });
+  
+
+  var allRows = ArrayBuffer[String]()
+  def emitForMagicLeap(row:Int, text:String, invertStart:Int, invertLength:Int)={
+      if (invertLength == 0) {
+        allRows(row) = text
+      } else {
+        var s = text substring (0, invertStart)
+        s += """<mark=#CCC$$C05 padding="10, 10, 0, 0">"""
+        s += text substring (invertStart, invertStart+invertLength)
+        s += """</mark>"""
+        s += text substring (invertStart+invertLength, text.length)
+        allRows(row) = s
+      }
+      println(allRows mkString "<BR>")
+  }
 
   def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
     row match {
-      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) }
-      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) }
-      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) }
-      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) }
+      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
+      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
+      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
+      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
       case _ => {  } 
     }
   }
@@ -185,6 +204,12 @@ object TenoriOnLCD extends JFrame {
     thisFrame.add(row1)
     thisFrame.add(row2)
     thisFrame.add(row3)
+
+    allRows += ""
+    allRows += ""
+    allRows += ""
+    allRows += ""
+
 
     thisFrame.setVisible(true);
     thisFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
