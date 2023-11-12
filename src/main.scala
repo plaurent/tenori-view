@@ -19,6 +19,8 @@ import javax.sound.midi.MidiMessage
 
 import scala.collection.mutable.ArrayBuffer
 
+import java.awt.GraphicsEnvironment
+import java.io.File
 
 
 object SysExListener {
@@ -79,12 +81,15 @@ object SysExListener {
 
               if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE))
               {
-                val str = new String(data) // , StandardCharsets.UTF_8)
+
+                val baseBytes = data slice (START_OF_STR, START_OF_STR+20)
+                val byteMask = getMask(data.slice(START_OF_STR+20, START_OF_STR+20+3))
+                val reconstructed = baseBytes zip byteMask map (pair => pair._1 + (if (pair._2) 0x80 else 0))
+                val reconstructedBytes = reconstructed map (x => x.toChar)
+
+                val str = new String(reconstructedBytes) // , StandardCharsets.UTF_8)
 
                 if (data(LCD_ROW_NUMBER) > 3  ) {
-                  val baseBytes = data slice (START_OF_STR, START_OF_STR+20)
-                  val byteMask = getMask(data.slice(START_OF_STR+20, START_OF_STR+20+3))
-                  val reconstructed = baseBytes zip byteMask map (pair => pair._1 + (if (pair._2) 0x80 else 0))
                   val dbg = reconstructed map (byte => (if (byte>15) "" else "0") + byte.toHexString.toUpperCase) mkString ""
                   Console.println(data(LCD_ROW_NUMBER) + ": " + dbg.grouped(4).toList.mkString(" "))
                 }
@@ -92,7 +97,7 @@ object SysExListener {
                 val invStart = data(INV_START_CHAR)
                 val invLength = data(INV_NUM_CHARS)
 
-                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
+                TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str, invStart, invLength)
               }
 
               if (DEBUG) {
@@ -145,7 +150,7 @@ object TenoriOnLCD extends JFrame {
     val MAX_FONT_SIZE = 70.0;
     val MIN_FONT_SIZE = 10.0;
     var fontSizeReal:Double = row0.getFont().getSize;
-    var fontNameReal= row0.getFont().getName;
+    var fontNameReal= "Tenori-On";  // row0.getFont().getName;
 
     addComponentListener(new ComponentAdapter() {
             override def componentResized(e:ComponentEvent) {
@@ -229,7 +234,17 @@ object Console extends JFrame with hasPrintln {
   def launch= {
     val thisFrame = Console
 
-    textArea = new JTextArea("Messages for LCD row > 3 will go here.\n");
+    val version = {
+      try {
+        io.Source.fromResource("git-commit-hash.txt").getLines.next
+      } catch {
+        case e:Exception => {
+          "unknown"
+      }
+      }
+    }
+
+    textArea = new JTextArea("Version "+version+"\nMessages for LCD row > 3 will go here.\n");
     textArea.setSize(300,300);
 
     textArea.setLineWrap(true);
@@ -250,6 +265,24 @@ object Console extends JFrame with hasPrintln {
 
 
 object main extends App {
+
+  try {
+    val customFont = Font.createFont(Font.TRUETYPE_FONT, (Thread.currentThread.getContextClassLoader.getResourceAsStream("Tenori-On.ttf"))).deriveFont(12f)
+    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+    ge.registerFont(customFont)
+  } catch {
+    case e:Exception => {
+      e.printStackTrace()
+    }
+    println("Could not load Tenori-On.ttf font from resource, trying to load from local file.")
+    val customFont = Font.createFont(Font.TRUETYPE_FONT, (new File("Tenori-On.ttf"))).deriveFont(12f)
+    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+    ge.registerFont(customFont)
+  }
+
+
+
+
   Console.launch
   TenoriOnLCD.launch
   SysExListener.launch
