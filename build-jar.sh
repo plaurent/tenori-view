@@ -33,4 +33,14 @@ rm Manifest.txt
 
 
 cd ..
+
+
+echo "Making distribution zip"
+mkdir tenori-view
+cp tenori-view.jar tenori-view
+cp src/git-commit-hash.txt tenori-view
+rm tenori-view.zip
+zip -r tenori-view.zip tenori-view
+
+echo "Enjoy tenori-view.zip distribution zip in `pwd`"
 echo "Enjoy tenori-view.jar in `pwd`"
