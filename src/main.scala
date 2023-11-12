@@ -34,7 +34,7 @@ object SysExListener {
     return ((value >> which) & 1) == 1
   }
   def getMask(extension_bytes:Array[Byte]):List[Boolean]= {
-    //<ex0-6> = 7 bits, one for each of the first 7 characters, indicating whether the character should be OR'd with 0x80. 
+    //<ex0-6> = 7 bits, one for each of the first 7 characters, indicating whether the character should be OR'd with 0x80.
     //<ex7-13> = ditto, for the next 7 characters
     //<ex14-19> = ditto, for the next 7 characters.
 
@@ -77,15 +77,15 @@ object SysExListener {
               val sysExMessage = message.asInstanceOf[SysexMessage];
               val data = sysExMessage.getData();
 
-              if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE)) 
+              if (data.length > START_OF_STR && data.slice(0,5).sameElements(PREAMBLE))
               {
                 val str = new String(data) // , StandardCharsets.UTF_8)
 
-                if (data(LCD_ROW_NUMBER) > 3  ) {  
+                if (data(LCD_ROW_NUMBER) > 3  ) {
                   val baseBytes = data slice (START_OF_STR, START_OF_STR+20)
                   val byteMask = getMask(data.slice(START_OF_STR+20, START_OF_STR+20+3))
                   val reconstructed = baseBytes zip byteMask map (pair => pair._1 + (if (pair._2) 0x80 else 0))
-                  val dbg = reconstructed map (byte => (if (byte>10) "" else "0") + byte.toHexString.toUpperCase) mkString ""
+                  val dbg = reconstructed map (byte => (if (byte>15) "" else "0") + byte.toHexString.toUpperCase) mkString ""
                   Console.println(data(LCD_ROW_NUMBER) + ": " + dbg.grouped(4).toList.mkString(" "))
                 }
 
@@ -94,7 +94,7 @@ object SysExListener {
 
                 TenoriOnLCD.displayText(data(LCD_ROW_NUMBER), str substring(START_OF_STR, START_OF_STR+20), invStart, invLength)
               }
-              
+
               if (DEBUG) {
                 for (byte <- data) {
                   print(byte + " ")
@@ -166,7 +166,7 @@ object TenoriOnLCD extends JFrame {
                 currentSize = getSize()
             }
         });
-  
+
 
   var allRows = ArrayBuffer[String]()
   def emitForMagicLeap(row:Int, text:String, invertStart:Int, invertLength:Int)={
@@ -189,13 +189,13 @@ object TenoriOnLCD extends JFrame {
       case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
       case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
       case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
-      case _ => {  } 
+      case _ => {  }
     }
   }
 
 
   def launch = {
-    val thisFrame = TenoriOnLCD 
+    val thisFrame = TenoriOnLCD
     thisFrame.setLayout(new java.awt.GridLayout(4,1));
     val size = new Dimension(200, 250)
     thisFrame.setSize(size)
