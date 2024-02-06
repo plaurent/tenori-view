@@ -150,7 +150,7 @@ object TenoriOnLCD extends JFrame {
     val MAX_FONT_SIZE = 70.0;
     val MIN_FONT_SIZE = 10.0;
     var fontSizeReal:Double = row0.getFont().getSize;
-    var fontNameReal= "Tenori-On";  // row0.getFont().getName;
+    var fontNameReal= "TNRFont";  // row0.getFont().getName;
 
     addComponentListener(new ComponentAdapter() {
             override def componentResized(e:ComponentEvent) {
@@ -179,7 +179,7 @@ object TenoriOnLCD extends JFrame {
         allRows(row) = text
       } else {
         var s = text substring (0, invertStart)
-        s += """<mark=#CCC$$C05 padding="10, 10, 0, 0">"""
+        s += """<mark=#CCC$$C05 padding="30, 10, 0, 0">"""
         s += text substring (invertStart, invertStart+invertLength)
         s += """</mark>"""
         s += text substring (invertStart+invertLength, text.length)
@@ -246,6 +246,8 @@ object Console extends JFrame with hasPrintln {
 
     textArea = new JTextArea("Version "+version+"\nMessages for LCD row > 3 will go here.\n");
     textArea.setSize(300,300);
+    var fontNameReal= "TNRFont";  // row0.getFont().getName;
+    textArea.setFont(new Font(fontNameReal, Font.PLAIN, 14));
 
     textArea.setLineWrap(true);
     textArea.setEditable(true);
@@ -257,7 +259,7 @@ object Console extends JFrame with hasPrintln {
 
     val scroll = new JScrollPane (textArea);
     thisFrame.add(scroll);
-    thisFrame.setSize(new Dimension(400, 400))
+    thisFrame.setSize(new Dimension(600, 400))
     thisFrame.setVisible(true);
     thisFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
