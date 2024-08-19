@@ -90,7 +90,8 @@ object SysExListener {
                 val str = new String(reconstructedBytes) // , StandardCharsets.UTF_8)
 
                 if (data(LCD_ROW_NUMBER) > 3  ) {
-                  val dbg = reconstructed map (byte => (if (byte>15) "" else "0") + byte.toHexString.toUpperCase) mkString ""
+                  val reconstructed_swap = reconstructed grouped(2) flatMap(pair => List(pair(1), pair(0))) toList
+                  val dbg = reconstructed_swap map (byte => (if (byte>15) "" else "0") + byte.toHexString.toUpperCase) mkString ""
                   Console.println(data(LCD_ROW_NUMBER) + ": " + dbg.grouped(4).toList.mkString(" "))
                 }
 
