@@ -15,5 +15,5 @@ You can then connect your Tenori-On to the computer and double-click `tenori-vie
 ## Demo Video
 
 https://vimeo.com/pakl/tenori-view-demo01
-[![Demo Video](https://pakl.net/serve/tenori-view-demo-video-icon.png)](https://vimeo.com/pakl/tenori-view-demo01  "Demo video - Click to Watch!")
+[![Demo Video](https://pakl.net/serve/tenori-view-demo-video-icon.png)](https://vimeo.com/pakl/tenori-view-demo "Demo video - Click to Watch!")
 
