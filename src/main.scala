@@ -175,7 +175,7 @@ object TenoriOnLCD extends JFrame {
 
 
   var allRows = ArrayBuffer[String]()
-  def emitForMagicLeap(row:Int, text:String, invertStart:Int, invertLength:Int)={
+  def emitForRemoteViewer(row:Int, text:String, invertStart:Int, invertLength:Int)={
       if (invertLength == 0) {
         allRows(row) = text
       } else {
@@ -191,10 +191,10 @@ object TenoriOnLCD extends JFrame {
 
   def displayText(row:Int, text:String, invStart:Int, invLength:Int)={
     row match {
-      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
-      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
-      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
-      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) ; emitForMagicLeap(row,text,invStart,invLength) }
+      case 0 => { row0.setDocument(createDocument(text, invStart, invLength)) ; emitForRemoteViewer(row,text,invStart,invLength) }
+      case 1 => { row1.setDocument(createDocument(text, invStart, invLength)) ; emitForRemoteViewer(row,text,invStart,invLength) }
+      case 2 => { row2.setDocument(createDocument(text, invStart, invLength)) ; emitForRemoteViewer(row,text,invStart,invLength) }
+      case 3 => { row3.setDocument(createDocument(text, invStart, invLength)) ; emitForRemoteViewer(row,text,invStart,invLength) }
       case _ => {  }
     }
   }
