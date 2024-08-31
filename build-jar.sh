@@ -12,7 +12,7 @@ rm -f *.jar
 echo "Compiling"
 export CLASSPATH=$CLASSPATH:"../libs/*"
 scalac *scala -d ./bin/
-cp Tenori-On.ttf ./bin/
+cp ../Tenori-On.ttf ./bin/
 
 echo "Unpacking all required libraries for standalone distribution"
 cd bin
