@@ -232,7 +232,7 @@ object Console extends JFrame with hasPrintln {
   def println(s:String){
     textArea.setText(textArea.getText() + s + "\n")
   }
-  def launch= {
+  def launch(visible:Boolean=true)= {
     val thisFrame = Console
 
     val version = {
@@ -261,32 +261,41 @@ object Console extends JFrame with hasPrintln {
     val scroll = new JScrollPane (textArea);
     thisFrame.add(scroll);
     thisFrame.setSize(new Dimension(600, 400))
-    thisFrame.setVisible(true);
+    if (visible) { 
+      thisFrame.setVisible(true);
+    }
     thisFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
   }
 }
 
 
+
+
 object main extends App {
+  object TenoriView {
 
-  try {
-    val customFont = Font.createFont(Font.TRUETYPE_FONT, (Thread.currentThread.getContextClassLoader.getResourceAsStream("Tenori-On.ttf"))).deriveFont(12f)
-    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-    ge.registerFont(customFont)
-  } catch {
-    case e:Exception => {
-      e.printStackTrace()
+    def launchAll(shouldShowDebugWindow:Boolean=true)={
+      try {
+        val customFont = Font.createFont(Font.TRUETYPE_FONT, (Thread.currentThread.getContextClassLoader.getResourceAsStream("Tenori-On.ttf"))).deriveFont(12f)
+        val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+        ge.registerFont(customFont)
+      } catch {
+        case e:Exception => {
+          e.printStackTrace()
+        }
+        println("Could not load Tenori-On.ttf font from resource, trying to load from local file.")
+        val customFont = Font.createFont(Font.TRUETYPE_FONT, (new File("Tenori-On.ttf"))).deriveFont(12f)
+        val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+        ge.registerFont(customFont)
+      }
+
+
+
+
+      Console.launch(visible=shouldShowDebugWindow)
+      TenoriOnLCD.launch
+      SysExListener.launch
     }
-    println("Could not load Tenori-On.ttf font from resource, trying to load from local file.")
-    val customFont = Font.createFont(Font.TRUETYPE_FONT, (new File("Tenori-On.ttf"))).deriveFont(12f)
-    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-    ge.registerFont(customFont)
   }
-
-
-
-
-  Console.launch
-  TenoriOnLCD.launch
-  SysExListener.launch
+  TenoriView.launchAll()
 }

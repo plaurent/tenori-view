@@ -20,8 +20,14 @@ ls ../lib/*jar | sed "s/^/jar xf /" | sh
 cd ..
 
 
-echo "Building executable JAR"
+echo "Building executable JAR (with debug screen)"
 echo "Main-Class: main" > Manifest.txt
+echo `git log --format="%H" -n 1` > git-commit-hash.txt
+jar cfm tenori-view-debug.jar Manifest.txt git-commit-hash.txt lib/*jar -C bin .
+mv tenori-view-debug.jar ..
+
+echo "Building executable JAR (without debug screen)"
+echo "Main-Class: main_nodebug" > Manifest.txt
 echo `git log --format="%H" -n 1` > git-commit-hash.txt
 jar cfm tenori-view.jar Manifest.txt git-commit-hash.txt lib/*jar -C bin .
 mv tenori-view.jar ..
